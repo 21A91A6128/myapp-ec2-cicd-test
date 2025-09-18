@@ -29,13 +29,14 @@ jobs:
         run: |
           echo "$DEPLOY_SSH_KEY" > deploy_key
           chmod 600 deploy_key
-          
+
           # Fetch the public IP of the running EC2 instance based on environment
           IP=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=myapp-${{ steps.set-env.outputs.env }}" "Name=instance-state-name,Values=running" --query "Reservations[0].Instances[0].PublicIpAddress" --output text)
           
-          # Automatically accept the EC2 host key (disable strict host key checking)
+          # Ensure SSH directory exists and add the host key automatically
+          mkdir -p ~/.ssh
           ssh-keyscan -t rsa $IP >> ~/.ssh/known_hosts
-          
+
           # Copy the updated index.html to the EC2 instance
           scp -o StrictHostKeyChecking=no -i deploy_key app/index.html ubuntu@$IP:/tmp/index.html
           
