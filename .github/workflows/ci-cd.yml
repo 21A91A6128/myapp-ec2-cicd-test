@@ -23,6 +23,10 @@ jobs:
           if [[ "${{ github.ref_name }}" == "uat" ]]; then echo "env=uat" >> $GITHUB_OUTPUT; fi
           if [[ "${{ github.ref_name }}" == "main" ]]; then echo "env=prod" >> $GITHUB_OUTPUT; fi
 
+      - name: Replace environment placeholder in index.html
+        run: |
+          sed -i "s/{{ENV}}/${{ steps.set-env.outputs.env }}/g" app/index.html
+
       - name: Deploy to EC2
         env:
           DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
